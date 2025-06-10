@@ -1,0 +1,1102 @@
+{
+  "total_tools": 54,
+  "generated_at": "2025-06-10 15:50:11",
+  "categories": {
+    "dns": 18,
+    "dhcp": 18,
+    "ipam": 6,
+    "grid": 8,
+    "bulk": 4
+  },
+  "tools": [
+    {
+      "name": "infoblox_dns_list_zones",
+      "category": "dns",
+      "description": "List all DNS zones in the InfoBlox system",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "zone_format",
+          "type": "string",
+          "description": "Zone format filter (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dns_create_zone",
+      "category": "dns",
+      "description": "Create a new DNS zone",
+      "required_parameters": [
+        {
+          "name": "fqdn",
+          "type": "string",
+          "description": "Fully qualified domain name for the zone"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "zone_format",
+          "type": "string",
+          "description": "Zone format (optional, defaults to 'FORWARD')"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the zone (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dns_create_record_a",
+      "category": "dns",
+      "description": "Create a DNS A record",
+      "required_parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Record name (hostname)"
+        },
+        {
+          "name": "ipv4addr",
+          "type": "string",
+          "description": "IPv4 address"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "ttl",
+          "type": "integer",
+          "description": "Time to live in seconds (optional)"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the record (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dns_search_records",
+      "category": "dns",
+      "description": "Search for DNS records",
+      "required_parameters": [
+        {
+          "name": "record_type",
+          "type": "string",
+          "description": "Type of DNS record to search for"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Record name to search for (supports wildcards)"
+        },
+        {
+          "name": "ip_address",
+          "type": "string",
+          "description": "IP address to search for (for A/AAAA records)"
+        },
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "zone",
+          "type": "string",
+          "description": "Zone to search within (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_list_networks",
+      "category": "dhcp",
+      "description": "List all DHCP networks",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "network_view",
+          "type": "string",
+          "description": "Network view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "network_container",
+          "type": "string",
+          "description": "Filter by network container (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_create_network",
+      "category": "dhcp",
+      "description": "Create a new DHCP network",
+      "required_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Network address in CIDR format (e.g., '192.168.1.0/24')"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "network_view",
+          "type": "string",
+          "description": "Network view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the network (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_get_next_available_ip",
+      "category": "dhcp",
+      "description": "Get the next available IP address in a network",
+      "required_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Network address in CIDR format"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "num_ips",
+          "type": "integer",
+          "description": "Number of IP addresses to retrieve (default: 1)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_ipam_get_network_utilization",
+      "category": "ipam",
+      "description": "Get network utilization statistics",
+      "required_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Network address in CIDR format"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_grid_list_members",
+      "category": "grid",
+      "description": "List all grid members",
+      "required_parameters": [],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_grid_get_status",
+      "category": "grid",
+      "description": "Get grid system status",
+      "required_parameters": [],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dns_delete_zone",
+      "category": "dns",
+      "description": "Delete a DNS zone",
+      "required_parameters": [
+        {
+          "name": "zone_ref",
+          "type": "string",
+          "description": "Zone reference (from list_zones) or FQDN"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dns_get_zone_details",
+      "category": "dns",
+      "description": "Get detailed information about a DNS zone",
+      "required_parameters": [
+        {
+          "name": "zone_ref",
+          "type": "string",
+          "description": "Zone reference or FQDN"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dns_create_record_aaaa",
+      "category": "dns",
+      "description": "Create a DNS AAAA record (IPv6)",
+      "required_parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Record name (hostname)"
+        },
+        {
+          "name": "ipv6addr",
+          "type": "string",
+          "description": "IPv6 address"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "ttl",
+          "type": "integer",
+          "description": "Time to live in seconds (optional)"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the record (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dns_create_record_cname",
+      "category": "dns",
+      "description": "Create a DNS CNAME record",
+      "required_parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Record name (alias)"
+        },
+        {
+          "name": "canonical",
+          "type": "string",
+          "description": "Canonical name (target)"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "ttl",
+          "type": "integer",
+          "description": "Time to live in seconds (optional)"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the record (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dns_create_record_mx",
+      "category": "dns",
+      "description": "Create a DNS MX record",
+      "required_parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Domain name"
+        },
+        {
+          "name": "mail_exchanger",
+          "type": "string",
+          "description": "Mail exchanger hostname"
+        },
+        {
+          "name": "preference",
+          "type": "integer",
+          "description": "MX preference value"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "ttl",
+          "type": "integer",
+          "description": "Time to live in seconds (optional)"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the record (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dns_create_record_ptr",
+      "category": "dns",
+      "description": "Create a DNS PTR record (reverse lookup)",
+      "required_parameters": [
+        {
+          "name": "ipv4addr",
+          "type": "string",
+          "description": "IPv4 address for reverse lookup"
+        },
+        {
+          "name": "ptrdname",
+          "type": "string",
+          "description": "Domain name for the PTR record"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "ttl",
+          "type": "integer",
+          "description": "Time to live in seconds (optional)"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the record (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dns_create_record_srv",
+      "category": "dns",
+      "description": "Create a DNS SRV record",
+      "required_parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Service name (e.g., _sip._tcp.example.com)"
+        },
+        {
+          "name": "target",
+          "type": "string",
+          "description": "Target hostname"
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "description": "Port number"
+        },
+        {
+          "name": "priority",
+          "type": "integer",
+          "description": "Priority value"
+        },
+        {
+          "name": "weight",
+          "type": "integer",
+          "description": "Weight value"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "ttl",
+          "type": "integer",
+          "description": "Time to live in seconds (optional)"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the record (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dns_create_record_txt",
+      "category": "dns",
+      "description": "Create a DNS TXT record",
+      "required_parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Record name"
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "description": "Text content"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "ttl",
+          "type": "integer",
+          "description": "Time to live in seconds (optional)"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the record (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dns_update_record",
+      "category": "dns",
+      "description": "Update an existing DNS record",
+      "required_parameters": [
+        {
+          "name": "record_ref",
+          "type": "string",
+          "description": "Record reference (from search results)"
+        },
+        {
+          "name": "updates",
+          "type": "object",
+          "description": "Fields to update (varies by record type)"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dns_delete_record",
+      "category": "dns",
+      "description": "Delete a DNS record",
+      "required_parameters": [
+        {
+          "name": "record_ref",
+          "type": "string",
+          "description": "Record reference (from search results)"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dns_list_views",
+      "category": "dns",
+      "description": "List all DNS views",
+      "required_parameters": [],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dns_create_view",
+      "category": "dns",
+      "description": "Create a new DNS view",
+      "required_parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "View name"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the view (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dns_list_rpz_zones",
+      "category": "dns",
+      "description": "List Response Policy Zones",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dns_create_rpz_zone",
+      "category": "dns",
+      "description": "Create a Response Policy Zone",
+      "required_parameters": [
+        {
+          "name": "fqdn",
+          "type": "string",
+          "description": "RPZ zone FQDN"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "description": "DNS view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the RPZ zone (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_delete_network",
+      "category": "dhcp",
+      "description": "Delete a DHCP network",
+      "required_parameters": [
+        {
+          "name": "network_ref",
+          "type": "string",
+          "description": "Network reference or CIDR notation"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dhcp_get_network_details",
+      "category": "dhcp",
+      "description": "Get detailed information about a DHCP network",
+      "required_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Network in CIDR format"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dhcp_create_fixed_address",
+      "category": "dhcp",
+      "description": "Create a fixed address reservation",
+      "required_parameters": [
+        {
+          "name": "ipv4addr",
+          "type": "string",
+          "description": "IPv4 address to reserve"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "mac",
+          "type": "string",
+          "description": "MAC address (optional)"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Name for the reservation (optional)"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the reservation (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_list_fixed_addresses",
+      "category": "dhcp",
+      "description": "List all fixed address reservations",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Filter by network (optional)"
+        },
+        {
+          "name": "mac",
+          "type": "string",
+          "description": "Filter by MAC address (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_delete_fixed_address",
+      "category": "dhcp",
+      "description": "Delete a fixed address reservation",
+      "required_parameters": [
+        {
+          "name": "fixed_address_ref",
+          "type": "string",
+          "description": "Fixed address reference or IP address"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dhcp_create_range",
+      "category": "dhcp",
+      "description": "Create a DHCP range within a network",
+      "required_parameters": [
+        {
+          "name": "start_addr",
+          "type": "string",
+          "description": "Start IP address of the range"
+        },
+        {
+          "name": "end_addr",
+          "type": "string",
+          "description": "End IP address of the range"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Parent network in CIDR format (optional)"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the range (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_list_ranges",
+      "category": "dhcp",
+      "description": "List all DHCP ranges",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Filter by network (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_list_options",
+      "category": "dhcp",
+      "description": "List DHCP option definitions",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "space",
+          "type": "string",
+          "description": "Option space (optional, defaults to 'DHCP')"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_create_option",
+      "category": "dhcp",
+      "description": "Create a custom DHCP option definition",
+      "required_parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Option name"
+        },
+        {
+          "name": "code",
+          "type": "integer",
+          "description": "Option code"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Option data type"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "space",
+          "type": "string",
+          "description": "Option space (optional, defaults to 'DHCP')"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the option (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_assign_option_to_network",
+      "category": "dhcp",
+      "description": "Assign a DHCP option to a network",
+      "required_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Network in CIDR format"
+        },
+        {
+          "name": "option_name",
+          "type": "string",
+          "description": "DHCP option name"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "description": "Option value"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dhcp_list_leases",
+      "category": "dhcp",
+      "description": "List active DHCP leases",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Filter by network (optional)"
+        },
+        {
+          "name": "ip_address",
+          "type": "string",
+          "description": "Filter by IP address (optional)"
+        },
+        {
+          "name": "mac_address",
+          "type": "string",
+          "description": "Filter by MAC address (optional)"
+        },
+        {
+          "name": "client_hostname",
+          "type": "string",
+          "description": "Filter by client hostname (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_clear_lease",
+      "category": "dhcp",
+      "description": "Clear a specific DHCP lease",
+      "required_parameters": [
+        {
+          "name": "lease_ref",
+          "type": "string",
+          "description": "Lease reference or IP address"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dhcp_get_lease_history",
+      "category": "dhcp",
+      "description": "Get DHCP lease history for an IP address",
+      "required_parameters": [
+        {
+          "name": "ip_address",
+          "type": "string",
+          "description": "IP address to get history for"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_dhcp_list_network_containers",
+      "category": "dhcp",
+      "description": "List network containers",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "network_view",
+          "type": "string",
+          "description": "Network view name (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_dhcp_create_network_container",
+      "category": "dhcp",
+      "description": "Create a network container",
+      "required_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Network container in CIDR format"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "network_view",
+          "type": "string",
+          "description": "Network view name (optional, defaults to 'default')"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the container (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_ipam_discover_networks",
+      "category": "ipam",
+      "description": "Discover networks in the infrastructure",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "network_view",
+          "type": "string",
+          "description": "Network view to discover in (optional)"
+        },
+        {
+          "name": "discovery_member",
+          "type": "string",
+          "description": "Grid member to perform discovery (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_ipam_scan_network",
+      "category": "ipam",
+      "description": "Scan a specific network for active hosts",
+      "required_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Network to scan in CIDR format"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "scan_type",
+          "type": "string",
+          "description": "Type of scan to perform (optional, defaults to PING)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_ipam_find_next_available_network",
+      "category": "ipam",
+      "description": "Find the next available subnet within a container",
+      "required_parameters": [
+        {
+          "name": "container",
+          "type": "string",
+          "description": "Network container in CIDR format"
+        },
+        {
+          "name": "cidr",
+          "type": "integer",
+          "description": "CIDR prefix length for the new subnet"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "num_networks",
+          "type": "integer",
+          "description": "Number of networks to find (default: 1)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_ipam_calculate_subnets",
+      "category": "ipam",
+      "description": "Calculate subnet divisions for a network",
+      "required_parameters": [
+        {
+          "name": "network",
+          "type": "string",
+          "description": "Network to divide in CIDR format"
+        },
+        {
+          "name": "subnet_size",
+          "type": "integer",
+          "description": "Size of each subnet (CIDR prefix)"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_ipam_get_utilization_summary",
+      "category": "ipam",
+      "description": "Get utilization summary for all networks",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "network_view",
+          "type": "string",
+          "description": "Network view to analyze (optional)"
+        },
+        {
+          "name": "threshold",
+          "type": "integer",
+          "description": "Utilization threshold percentage (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_grid_get_member_details",
+      "category": "grid",
+      "description": "Get detailed information about a grid member",
+      "required_parameters": [
+        {
+          "name": "member_name",
+          "type": "string",
+          "description": "Grid member hostname or IP"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_grid_restart_services",
+      "category": "grid",
+      "description": "Restart services on a grid member",
+      "required_parameters": [
+        {
+          "name": "member_name",
+          "type": "string",
+          "description": "Grid member hostname or IP"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "service_option",
+          "type": "string",
+          "description": "Service to restart (optional, defaults to ALL)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_grid_backup_database",
+      "category": "grid",
+      "description": "Create a database backup",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "backup_type",
+          "type": "string",
+          "description": "Type of backup (optional, defaults to DATABASE)"
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "description": "Comment for the backup (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_grid_list_backups",
+      "category": "grid",
+      "description": "List available database backups",
+      "required_parameters": [],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_grid_get_system_info",
+      "category": "grid",
+      "description": "Get grid system information",
+      "required_parameters": [],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_grid_get_capacity_report",
+      "category": "grid",
+      "description": "Get grid capacity and performance report",
+      "required_parameters": [],
+      "optional_parameters": [
+        {
+          "name": "member_name",
+          "type": "string",
+          "description": "Specific member to report on (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_bulk_import_csv",
+      "category": "bulk",
+      "description": "Import data from CSV file",
+      "required_parameters": [
+        {
+          "name": "operation",
+          "type": "string",
+          "description": "Import operation type"
+        },
+        {
+          "name": "object_type",
+          "type": "string",
+          "description": "Object type to import (e.g., 'record:a', 'network')"
+        },
+        {
+          "name": "csv_data",
+          "type": "string",
+          "description": "CSV data as string"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "update_policy",
+          "type": "string",
+          "description": "Update policy for existing records (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_bulk_export_csv",
+      "category": "bulk",
+      "description": "Export data to CSV format",
+      "required_parameters": [
+        {
+          "name": "object_type",
+          "type": "string",
+          "description": "Object type to export (e.g., 'record:a', 'network')"
+        }
+      ],
+      "optional_parameters": [
+        {
+          "name": "search_params",
+          "type": "object",
+          "description": "Search parameters to filter export (optional)"
+        },
+        {
+          "name": "return_fields",
+          "type": "array",
+          "description": "Fields to include in export (optional)"
+        }
+      ]
+    },
+    {
+      "name": "infoblox_bulk_create_a_records",
+      "category": "bulk",
+      "description": "Create multiple A records from a list",
+      "required_parameters": [
+        {
+          "name": "records",
+          "type": "array",
+          "description": "List of A records to create"
+        }
+      ],
+      "optional_parameters": []
+    },
+    {
+      "name": "infoblox_bulk_delete_records",
+      "category": "bulk",
+      "description": "Delete multiple records by reference",
+      "required_parameters": [
+        {
+          "name": "record_refs",
+          "type": "array",
+          "description": "List of record references to delete"
+        }
+      ],
+      "optional_parameters": []
+    }
+  ]
+}
