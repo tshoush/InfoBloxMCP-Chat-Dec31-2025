@@ -6,6 +6,7 @@ import getpass
 from pathlib import Path
 from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field, validator
+from cryptography.fernet import Fernet
 from .error_handling import ConfigurationError, validate_ip_address
 
 
