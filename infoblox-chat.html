@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marriott InfoBlox Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8B1538 0%, #A91B47 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(139, 21, 56, 0.95);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: #B8860B;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: fit-content;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h3 {
+            color: #8B1538;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .sample-queries {
+            list-style: none;
+        }
+
+        .sample-queries li {
+            margin-bottom: 0.8rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid #B8860B;
+        }
+
+        .sample-queries li:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .chat-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            min-height: 400px;
+            max-height: 600px;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.assistant {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 1rem;
+            border-radius: 12px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: #8B1538;
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e9ecef;
+        }
+
+        .chat-input {
+            padding: 1.5rem;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .method-selector {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .method-selector label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .chat-input input:focus {
+            border-color: #8B1538;
+            box-shadow: 0 0 0 2px rgba(139, 21, 56, 0.1);
+        }
+
+        .send-btn {
+            padding: 1rem 2rem;
+            background: #8B1538;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .send-btn:hover {
+            background: #A91B47;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #666;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+        }
+
+        .loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #8B1538;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            <div class="logo">M</div>
+            Marriott InfoBlox Assistant
+        </h1>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <h3>📋 Sample InfoBlox Queries</h3>
+            <ul class="sample-queries">
+                <li onclick="sendQuery('Show me all DNS zones')">🌐 Show me all DNS zones</li>
+                <li onclick="sendQuery('List DHCP networks')">🔗 List DHCP networks</li>
+                <li onclick="sendQuery('Get grid member status')">⚡ Get grid member status</li>
+                <li onclick="sendQuery('Show network utilization')">📊 Show network utilization</li>
+                <li onclick="sendQuery('List A records for example.com')">📝 List A records for example.com</li>
+                <li onclick="sendQuery('Show DHCP lease statistics')">📈 Show DHCP lease statistics</li>
+                <li onclick="sendQuery('Get DNS query statistics')">🔍 Get DNS query statistics</li>
+                <li onclick="sendQuery('List all host records')">🖥️ List all host records</li>
+                <li onclick="sendQuery('Show network discovery status')">🔎 Show network discovery status</li>
+                <li onclick="sendQuery('Get system health status')">❤️ Get system health status</li>
+            </ul>
+
+            <h3 style="margin-top: 2rem;">🏨 About</h3>
+            <p style="font-size: 0.9rem; color: #666; line-height: 1.4;">
+                This is your Marriott-branded InfoBlox assistant. Ask questions about your network infrastructure, DNS, DHCP, and more.
+            </p>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <h3>Welcome to Marriott InfoBlox Assistant! 🏨</h3>
+                    <p>Ask me anything about your InfoBlox infrastructure. Try one of the sample queries on the left, or type your own question below.</p>
+                </div>
+            </div>
+            <div class="chat-input">
+                <div class="method-selector">
+                    <span>Query Method:</span>
+                    <label>
+                        <input type="radio" name="method" value="mcp" checked> MCP Server
+                    </label>
+                    <label>
+                        <input type="radio" name="method" value="direct"> Direct WAPI
+                    </label>
+                </div>
+                <div class="input-row">
+                    <input type="text" id="messageInput" placeholder="Ask about your InfoBlox infrastructure..." onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" onclick="sendMessage()" id="sendBtn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content;
+            
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendQuery(query) {
+            messageInput.value = query;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Clear welcome message if it exists
+            const welcomeMsg = document.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+
+            // Add user message
+            addMessage(message, true);
+            messageInput.value = '';
+            sendBtn.disabled = true;
+
+            // Add loading message
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant';
+            loadingDiv.innerHTML = '<div class="message-content loading">Processing your InfoBlox query...</div>';
+            chatMessages.appendChild(loadingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                // Simulate InfoBlox MCP server call
+                const response = await simulateInfoBloxQuery(message);
+                
+                // Remove loading message
+                loadingDiv.remove();
+                
+                // Add response
+                addMessage(response);
+            } catch (error) {
+                loadingDiv.remove();
+                addMessage('❌ Error connecting to InfoBlox. Please check your connection and try again.');
+            }
+
+            sendBtn.disabled = false;
+        }
+
+        async function simulateInfoBloxQuery(query) {
+            try {
+                // Get selected method
+                const methodRadio = document.querySelector('input[name="method"]:checked');
+                const useMcp = methodRadio ? methodRadio.value === 'mcp' : true;
+
+                // Call the actual InfoBlox MCP backend
+                const response = await fetch('http://localhost:5001/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        use_mcp: useMcp
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    return data.response;
+                } else {
+                    return data.response || '❌ Error processing your query.';
+                }
+            } catch (error) {
+                console.error('Error calling InfoBlox backend:', error);
+                return `
+                    <strong>❌ Connection Error:</strong><br><br>
+                    Unable to connect to InfoBlox MCP server. Please ensure:<br><br>
+                    • InfoBlox MCP backend is running on port 5001<br>
+                    • InfoBlox NIOS is accessible<br>
+                    • Network connectivity is available<br><br>
+                    <em>Error details: ${error.message}</em>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

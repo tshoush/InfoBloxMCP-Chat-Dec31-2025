@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from mcp.server import Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
+from mcp.server.lowlevel.server import NotificationOptions
 from mcp.types import (
     Resource,
     Tool,
@@ -106,6 +107,8 @@ class InfoBloxMCPServer:
                 await self._ensure_client()
                 
                 # Execute the tool
+                if self.client is None:
+                    raise InfoBloxAPIError("InfoBlox client not initialized")
                 result = await self.tool_registry.execute_tool(name, arguments, self.client)
                 
                 return [types.TextContent(type="text", text=result)]
@@ -158,8 +161,8 @@ class InfoBloxMCPServer:
                         server_name="infoblox-mcp-server",
                         server_version="1.0.0",
                         capabilities=self.server.get_capabilities(
-                            notification_options=None,
-                            experimental_capabilities=None
+                            notification_options=NotificationOptions(),
+                            experimental_capabilities={}
                         )
                     )
                 )

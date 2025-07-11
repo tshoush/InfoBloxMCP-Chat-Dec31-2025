@@ -262,7 +262,58 @@ class InfoBloxClient:
     
     def get_network_utilization(self, network_ref: str) -> Dict[str, Any]:
         """Get network utilization statistics."""
-        return self.get(f"{network_ref}?_function=utilization")
+        try:
+            # InfoBlox doesn't have a direct utilization function
+            # We need to calculate it from available data
+
+            # Get the network details first
+            network_data = self.get(network_ref)
+            network_addr = network_data.get('network', '')
+
+            if not network_addr:
+                return {"error": "Network address not found"}
+
+            # Calculate total IPs in network
+            import ipaddress
+            try:
+                net = ipaddress.IPv4Network(network_addr, strict=False)
+                total_ips = net.num_addresses - 2  # Exclude network and broadcast addresses
+            except ValueError:
+                return {"error": f"Invalid network format: {network_addr}"}
+
+            # Get used IPs by counting fixed addresses and leases
+            used_ips = 0
+
+            # Count fixed addresses in this network
+            try:
+                fixed_addrs = self.search_objects("fixedaddress", {"network": network_addr})
+                used_ips += len(fixed_addrs)
+            except Exception:
+                pass  # Continue even if this fails
+
+            # Count DHCP leases (active ones)
+            try:
+                leases = self.search_objects("lease", {"network": network_addr})
+                # Filter for active leases only
+                active_leases = [lease for lease in leases if lease.get('binding_state') == 'ACTIVE']
+                used_ips += len(active_leases)
+            except Exception:
+                pass  # Continue even if this fails
+
+            # Calculate utilization percentage
+            utilization_percent = (used_ips / total_ips * 100) if total_ips > 0 else 0
+
+            return {
+                "network": network_addr,
+                "total_ips": total_ips,
+                "used_ips": used_ips,
+                "available_ips": total_ips - used_ips,
+                "utilization_percent": round(utilization_percent, 2),
+                "utilization": round(utilization_percent, 2)  # For backward compatibility
+            }
+
+        except Exception as e:
+            return {"error": f"Failed to calculate utilization: {str(e)}"}
     
     def __enter__(self):
         """Context manager entry."""
