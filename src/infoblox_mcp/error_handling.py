@@ -111,6 +111,8 @@ def validate_ip_address(ip_str: str) -> bool:
 def validate_network_cidr(network_str: str) -> bool:
     """Validate network CIDR format."""
     import ipaddress
+    if '/' not in network_str:
+        return False
     try:
         ipaddress.ip_network(network_str, strict=False)
         return True

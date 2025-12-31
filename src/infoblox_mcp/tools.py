@@ -7,8 +7,9 @@ from mcp.types import Tool
 from .client import InfoBloxClient, InfoBloxAPIError
 from .dns_tools import DNSTools
 from .dhcp_tools import DHCPTools
-from .additional_tools import IPAMTools, GridTools, BulkTools, AnalysisTools
+from .additional_tools import IPAMTools, GridTools, BulkTools, SearchTools
 from .splunk_tools import SplunkTools
+from .aws_import_tools import AWSImportTools
 
 
 logger = logging.getLogger(__name__)
@@ -69,8 +70,9 @@ class ToolRegistry:
         IPAMTools.register_tools(self)
         GridTools.register_tools(self)
         BulkTools.register_tools(self)
-        AnalysisTools.register_tools(self)
+        SearchTools.register_tools(self)
         SplunkTools.register_tools(self)
+        AWSImportTools.register_tools(self)
     
     def _register_basic_dns_tools(self):
         """Register basic DNS management tools."""

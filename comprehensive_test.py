@@ -7,6 +7,7 @@ import os
 import tempfile
 import shutil
 from unittest.mock import Mock, patch
+from pathlib import Path
 
 # Add the src directory to the Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
@@ -56,7 +57,7 @@ async def test_configuration_management(results: TestResults):
     # Test with temporary directory
     with tempfile.TemporaryDirectory() as temp_dir:
         try:
-            config_manager = ConfigManager(temp_dir)
+            config_manager = ConfigManager(Path(temp_dir))
             
             # Test saving and loading configuration
             test_config = InfoBloxConfig(
@@ -198,7 +199,9 @@ async def test_tool_registry(results: TestResults):
             'infoblox_dns_create_zone',
             'infoblox_dhcp_list_networks',
             'infoblox_dhcp_create_network',
-            'infoblox_grid_list_members'
+            'infoblox_grid_list_members',
+            'infoblox_aws_import_analysis',
+            'infoblox_splunk_audit_search'
         ]
         
         for tool_name in expected_tools:
@@ -265,7 +268,11 @@ async def test_mock_client_operations(results: TestResults):
             mock_session.return_value.get.return_value = mock_response
             mock_session.return_value.post.return_value = mock_response
             mock_session.return_value.put.return_value = mock_response
+            mock_session.return_value.get.return_value = mock_response
+            mock_session.return_value.post.return_value = mock_response
+            mock_session.return_value.put.return_value = mock_response
             mock_session.return_value.delete.return_value = mock_response
+            mock_session.return_value.request.return_value = mock_response
             
             # Test client initialization
             client = InfoBloxClient(config)

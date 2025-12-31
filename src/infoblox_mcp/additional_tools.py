@@ -772,59 +772,14 @@ class BulkTools:
             raise InfoBloxAPIError(f"Failed to bulk delete records: {str(e)}")
 
 
-class AnalysisTools:
-    """Analysis and reporting tools for InfoBlox."""
+
+class SearchTools:
+    """Search tools for InfoBlox."""
 
     @staticmethod
     def register_tools(registry):
-        """Register all analysis tools."""
+        """Register all search tools."""
         
-        # AWS PVC Import Analysis
-        registry.register_tool(
-            "infoblox_aws_import_analysis",
-            "Analyze AWS PVC export file for import readiness",
-            {
-                "type": "object",
-                "properties": {
-                    "file_name": {
-                        "type": "string",
-                        "description": "Absolute path to the AWS PVC export file (CSV)"
-                    },
-                    "network_view": {
-                        "type": "string",
-                        "description": "Target network view (default: 'default')"
-                    }
-                },
-                "required": ["file_name"]
-            },
-            AnalysisTools._aws_import_analysis
-        )
-
-        # AWS PVC Import Execution
-        registry.register_tool(
-            "infoblox_aws_import_execute",
-            "Import AWS PVC export file (creates networks)",
-            {
-                "type": "object",
-                "properties": {
-                    "file_name": {
-                        "type": "string",
-                        "description": "Absolute path to the AWS PVC export file (CSV)"
-                    },
-                    "dry_run": {
-                        "type": "boolean",
-                        "description": "If true, simulate creation without changes (default: true)"
-                    },
-                    "network_view": {
-                        "type": "string",
-                        "description": "Target network view (default: 'default')"
-                    }
-                },
-                "required": ["file_name"]
-            },
-            AnalysisTools._aws_import_execute
-        )
-
         # MARSHA EA Search
         registry.register_tool(
             "infoblox_search_marsha",
@@ -839,7 +794,7 @@ class AnalysisTools:
                 },
                 "required": ["marsha_value"]
             },
-            AnalysisTools._search_marsha
+            SearchTools._search_marsha
         )
 
     @staticmethod
@@ -848,12 +803,7 @@ class AnalysisTools:
         try:
             marsha_value = args["marsha_value"]
             
-            # 1. Check if MARSHA EA definition exists (optional but good practice)
-            # We skip this for speed, relying on the search to fail or return empty if EA doesn't exist
-            # but usually *EA search requires the EA to be defined.
-            
-            # 2. Perform Search
-            # In WAPI, searching by EA uses *EA_Name notation
+            # Search parameters
             search_params = {
                 "*MARSHA": marsha_value
             }
@@ -872,223 +822,3 @@ class AnalysisTools:
             logger.error(f"Error searching by MARSHA EA: {str(e)}")
             raise InfoBloxAPIError(f"Failed to search by MARSHA EA: {str(e)}")
 
-    @staticmethod
-    async def _aws_import_execute(args: Dict[str, Any], client: InfoBloxClient) -> str:
-        """Execute AWS PVC import."""
-        # Reuse analysis logic implicitly or duplicated for now to keep it clean, 
-        # but execution adds creation step.
-        # Ideally we refactor common logic, but to avoid breaking existing tool, copy-modify is safer for now
-        # given the constraint of minimizing risk.
-        
-        file_name = args["file_name"]
-        file_name = args["file_name"]
-        dry_run = args.get("dry_run", True)
-        network_view = args.get("network_view", "default")
-        
-        results = {
-            "total_records": 0,
-            "valid_records": 0,
-            "conflicts": [],
-            "missing_eas": set(),
-            "created_networks": [],
-            "errors": []
-        }
-
-        try:
-            # 1. Fetch valid EAs
-            try:
-                eas_resp = client.search_objects("extensibleattributedef")
-                valid_eas = {ea["name"] for ea in eas_resp}
-            except Exception:
-                valid_eas = set() # Proceed with empty set (will mark all as missing)
-
-            standard_aws_columns = {"AccountId", "Region", "VpcId", "Name"}
-            
-            with open(file_name, 'r', encoding='utf-8') as csvfile:
-                reader = csv.DictReader(csvfile)
-                
-                required_cols = ["CidrBlock", "Tags"]
-                if not all(col in reader.fieldnames for col in required_cols):
-                    return json.dumps({"error": "Missing required columns"})
-
-                for row in reader:
-                    results["total_records"] += 1
-                    cidr = row.get("CidrBlock")
-                    tags_str = row.get("Tags")
-                    
-                    if not cidr: continue
-
-                    # Check existence
-                    search_params = {"network": cidr}
-                    if network_view:
-                        search_params["network_view"] = network_view
-                    existing_nets = client.search_objects("network", search_params)
-                    if existing_nets:
-                        results["conflicts"].append({"network": cidr, "reason": "Exists"})
-                        continue
-                    
-                    # Prepare EAs
-                    record_eas = {} # Dict for creation {Name: Value}
-                    
-                    # Columns
-                    for col in standard_aws_columns:
-                        val = row.get(col)
-                        if val:
-                             if not valid_eas or col in valid_eas:
-                                 record_eas[col] = val
-                             else:
-                                 results["missing_eas"].add(col)
-                    
-                    # Tags
-                    if tags_str:
-                        try:
-                            tags_list = ast.literal_eval(tags_str)
-                            if isinstance(tags_list, list):
-                                for tag in tags_list:
-                                    if isinstance(tag, dict) and 'Key' in tag:
-                                        key = tag['Key']
-                                        val = tag.get('Value', "")
-                                        if not valid_eas or key in valid_eas:
-                                            record_eas[key] = val
-                                        else:
-                                            results["missing_eas"].add(key)
-                        except Exception:
-                            pass # Parse error ignored for execution flow, just won't add tags
-
-                    # Create Network
-                    if not dry_run:
-                        try:
-                            network_data = {
-                                "network": cidr,
-                                "network_view": network_view,
-                                "extensible_attributes": record_eas,
-                                "comment": "Imported from AWS PVC"
-                            }
-                            # InfoBlox WAPI uses "network" object for IPv4
-                            client.create_object("network", network_data)
-                            results["created_networks"].append(cidr)
-                        except Exception as e:
-                            results["errors"].append({"network": cidr, "error": str(e)})
-                    else:
-                        # In dry run, we assume success if we got here
-                        results["valid_records"] += 1
-
-            results["missing_eas"] = list(results["missing_eas"])
-            return json.dumps(results, indent=2)
-
-        except Exception as e:
-            raise InfoBloxAPIError(f"Import execution failed: {e}")
-
-
-    @staticmethod
-    async def _aws_import_analysis(args: Dict[str, Any], client: InfoBloxClient) -> str:
-        """Analyze AWS PVC export file."""
-        try:
-            file_name = args["file_name"]
-            network_view = args.get("network_view", "default")
-            
-            # Fetch valid InfoBlox EAs
-            try:
-                # We need to get all extensible attributes definitions to validate mapping
-                # Since there might be many, we'll fetch them all.
-                # In a real large scale environment, we might want to cache this or be more selective.
-                # extensibleattributedef is the WAPI object for EA definitions
-                eas_resp = client.search_objects("extensibleattributedef")
-                valid_eas = {ea["name"] for ea in eas_resp}
-            except Exception as e:
-                logger.warning(f"Could not fetch EA definitions: {e}. detailed validation disabled.")
-                valid_eas = set()
-
-            analysis_results = {
-                "total_records": 0,
-                "valid_records": 0,
-                "conflicts": [],
-                "missing_eas": set(),
-                "mapped_eas": set()
-            }
-            
-            # Standard AWS columns we might want to map to EAs if they exist in IB
-            standard_aws_columns = {"AccountId", "Region", "VpcId", "Name"}
-            
-            with open(file_name, 'r', encoding='utf-8') as csvfile:
-                # Use DictReader to handle headers automatically
-                reader = csv.DictReader(csvfile)
-                
-                # Check for required columns
-                required_cols = ["CidrBlock", "Tags"]
-                if not all(col in reader.fieldnames for col in required_cols):
-                    return json.dumps({"error": f"Missing required columns. Found: {reader.fieldnames}, Expected at least: {required_cols}"})
-
-                for row in reader:
-                    analysis_results["total_records"] += 1
-                    cidr = row.get("CidrBlock")
-                    tags_str = row.get("Tags")
-                    
-                    if not cidr:
-                        continue # Skip invalid rows
-
-                    # 1. Network Conflict Analysis
-                    # Check if network exists
-                    search_params = {"network": cidr}
-                    if network_view:
-                        search_params["network_view"] = network_view
-                        
-                    existing_nets = client.search_objects("network", search_params)
-                    if existing_nets:
-                        # Extract network view from the found network
-                        net_view = existing_nets[0].get("network_view", "unknown")
-                        analysis_results["conflicts"].append({
-                            "network": cidr,
-                            "reason": "Network already exists",
-                            "network_view": net_view,
-                            "target_view": network_view,
-                            "ref": existing_nets[0]["_ref"]
-                        })
-                    
-                    # 2. EA Analysis
-                    current_record_eas = set()
-                    
-                    # Process Standard Columns as potential EAs
-                    for col in standard_aws_columns:
-                        if col in row and row[col]:
-                             if not valid_eas or col in valid_eas:
-                                 current_record_eas.add(col)
-                             else:
-                                 analysis_results["missing_eas"].add(col)
-
-                    # Process Tags
-                    if tags_str:
-                        try:
-                            # Tags is typically "Key=Value;Key=Value" or JSON-like
-                            # Based on user input: "[{'Key': '...', 'Value': '...'}]"
-                            # We use ast.literal_eval for safe parsing of python-like string structures
-                            tags_list = ast.literal_eval(tags_str)
-                            
-                            if isinstance(tags_list, list):
-                                for tag in tags_list:
-                                    if isinstance(tag, dict) and 'Key' in tag:
-                                        key = tag['Key']
-                                        if not valid_eas or key in valid_eas:
-                                            current_record_eas.add(key)
-                                        else:
-                                            analysis_results["missing_eas"].add(key)
-                        except (ValueError, SyntaxError) as e:
-                            logger.warning(f"Failed to parse tags for {cidr}: {e}")
-                    
-                    analysis_results["mapped_eas"].update(current_record_eas)
-                    
-                    # If no conflict, we count as valid for now (even if EAs are missing, they just won't be imported)
-                    if not existing_nets:
-                         analysis_results["valid_records"] += 1
-
-            # Convert sets to lists for JSON serialization
-            analysis_results["missing_eas"] = list(analysis_results["missing_eas"])
-            analysis_results["mapped_eas"] = list(analysis_results["mapped_eas"])
-            
-            return json.dumps(analysis_results, indent=2)
-
-        except FileNotFoundError:
-             raise InfoBloxAPIError(f"File not found: {file_name}")
-        except Exception as e:
-            logger.error(f"Error analyzing AWS import: {str(e)}")
-            raise InfoBloxAPIError(f"Failed to analyze AWS import: {str(e)}")

@@ -129,48 +129,10 @@ class MCPChat:
 
         # 5. SMART SEARCH (Combined Tool)
         # Matches: "search <value>", "find <value>"
-        # Searches MARSHA, Zones, and Networks concurrently
         search_match = re.search(r'^(search|find)\s+["\']?([^"\']+)["\']?$', text_lower)
         if search_match:
             term = search_match.group(2)
-            print(f"Smart Search: Looking for '{term}' across Zones, Networks, and MARSHA tags...")
-            
-            # 1. Search Zones (Native)
-            zones = []
-            try:
-                zones = self.client.search_objects("zone_auth", {"fqdn~": term})
-            except: pass
-
-            # 2. Search MARSHA (Tool)
-            marsha_networks_json = await self._run_tool("infoblox_search_marsha", {"marsha_value": term}, print_output=False)
-            marsha_networks = []
-            try:
-                marsha_data = json.loads(marsha_networks_json)
-                marsha_networks = marsha_data.get('networks', [])
-            except: pass
-
-            # 3. Search Networks by Comment (Native)
-            comment_networks = []
-            try:
-                comment_networks = self.client.search_objects("network", {"comment~": term})
-            except: pass
-
-            # Aggregate Results
-            combined_results = {
-                "search_term": term,
-                "matches": {
-                    "zones": zones,
-                    "marsha_networks": marsha_networks,
-                    "comment_networks": comment_networks
-                }
-            }
-            
-            # Print Combined Results
-            print("\n=== Search Results ===")
-            if not any([zones, marsha_networks, comment_networks]):
-                print("No matches found.")
-            else:
-                print(json.dumps(combined_results, indent=2))
+            await self._handle_smart_search(term)
             return
 
         # 6. IMPORT AWS
@@ -287,6 +249,47 @@ class MCPChat:
         # 9. LLM FALLBACK
         await self._handle_llm_fallback(text)
 
+    async def _handle_smart_search(self, term):
+        """Perform smart search across multiple objects."""
+        print(f"Smart Search: Looking for '{term}' across Zones, Networks, and MARSHA tags...")
+        
+        # 1. Search Zones (Native)
+        zones = []
+        try:
+            zones = self.client.search_objects("zone_auth", {"fqdn~": term})
+        except: pass
+
+        # 2. Search MARSHA (Tool)
+        marsha_networks_json = await self._run_tool("infoblox_search_marsha", {"marsha_value": term}, print_output=False)
+        marsha_networks = []
+        try:
+            marsha_data = json.loads(marsha_networks_json)
+            marsha_networks = marsha_data.get('networks', [])
+        except: pass
+
+        # 3. Search Networks by Comment (Native)
+        comment_networks = []
+        try:
+            comment_networks = self.client.search_objects("network", {"comment~": term})
+        except: pass
+
+        # Aggregate Results
+        combined_results = {
+            "search_term": term,
+            "matches": {
+                "zones": zones,
+                "marsha_networks": marsha_networks,
+                "comment_networks": comment_networks
+            }
+        }
+        
+        # Print Combined Results
+        print("\n=== Search Results ===")
+        if not any([zones, marsha_networks, comment_networks]):
+            print("No matches found.")
+        else:
+            print(json.dumps(combined_results, indent=2))
+
     async def _handle_llm_fallback(self, text):
         """Pass unknown command to LLM if configured."""
         if not self.llm_client or not self.llm_client.is_configured():
@@ -374,7 +377,7 @@ class MCPChat:
         print("\nAvailable Commands:")
         print("  list networks              - Show network utilization summary")
         print("  search marsha <value>      - Find networks by MARSHA tag")
-        print("  search <value>             - Shorthand for MARSHA search")
+        print("  search <value>             - Search across Zones, Networks, and Tags")
         print("  import <filepath>          - Analyze and import AWS CSV file")
         print("  exit                       - Quit the chat\n")
 
