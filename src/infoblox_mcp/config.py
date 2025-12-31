@@ -3,6 +3,7 @@
 import json
 import os
 import getpass
+import click
 from pathlib import Path
 from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field, validator
@@ -22,6 +23,17 @@ class InfoBloxConfig(BaseModel):
     max_retries: int = Field(default=3, description="Maximum retry attempts")
     log_level: str = Field(default="INFO", description="Logging level")
     
+    # Splunk Configuration (Optional)
+    splunk_url: Optional[str] = Field(default=None, description="Splunk instance URL")
+    splunk_token: Optional[str] = Field(default=None, description="Splunk Authentication Token")
+    splunk_username: Optional[str] = Field(default=None, description="Splunk Username")
+    splunk_password: Optional[str] = Field(default=None, description="Splunk Password")
+
+    # LLM Configuration (Optional)
+    llm_api_key: Optional[str] = Field(default=None, description="LLM API Key")
+    llm_model: str = Field(default="gpt-4o", description="LLM Model Name")
+    llm_base_url: str = Field(default="https://api.openai.com/v1", description="LLM Base URL")
+
     @validator('grid_master_ip')
     def validate_ip(cls, v):
         """Validate IP address format."""
@@ -173,6 +185,32 @@ class ConfigManager:
             type=str
         )
         
+        # Splunk Configuration
+        click.echo("\nSplunk Configuration (Optional - for history/audit features):")
+        splunk_url = click.prompt("Splunk URL (e.g., https://splunk.example.com:8089)", default="", show_default=False).strip() or None
+        
+        splunk_token = None
+        splunk_username = None
+        splunk_password = None
+        
+        if splunk_url:
+            auth_type = click.prompt("Authentication Type (token/basic)", default="token", type=click.Choice(["token", "basic"]))
+            if auth_type == "token":
+                splunk_token = getpass.getpass("Splunk Token: ") or None
+            else:
+                splunk_username = click.prompt("Splunk Username", type=str)
+                splunk_password = getpass.getpass("Splunk Password: ")
+        
+        # LLM Configuration
+        click.echo("\nLLM Configuration (Optional - for Hybrid Fallback):")
+        llm_api_key = getpass.getpass("LLM API Key (OpenAI/Compatible): ") or None
+        llm_model = "gpt-4o"
+        llm_base_url = "https://api.openai.com/v1"
+        
+        if llm_api_key:
+            llm_model = click.prompt("Model Name", default="gpt-4o")
+            llm_base_url = click.prompt("Base URL", default="https://api.openai.com/v1")
+
         return InfoBloxConfig(
             grid_master_ip=grid_master_ip,
             username=username,
@@ -181,7 +219,14 @@ class ConfigManager:
             verify_ssl=verify_ssl,
             timeout=timeout,
             max_retries=max_retries,
-            log_level=log_level
+            log_level=log_level,
+            splunk_url=splunk_url,
+            splunk_token=splunk_token,
+            splunk_username=splunk_username,
+            splunk_password=splunk_password,
+            llm_api_key=llm_api_key,
+            llm_model=llm_model,
+            llm_base_url=llm_base_url
         )
     
     def get_config(self) -> InfoBloxConfig:

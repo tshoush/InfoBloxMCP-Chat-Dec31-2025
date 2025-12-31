@@ -263,44 +263,65 @@ class InfoBloxClient:
     def get_network_utilization(self, network_ref: str) -> Dict[str, Any]:
         """Get network utilization statistics."""
         try:
-            # InfoBlox doesn't have a direct utilization function
-            # We need to calculate it from available data
+            # Try to get native utilization from InfoBlox first
+            # utilization field is typically 0-1000 (representing 0.0% to 100.0%)
+            try:
+                network_data = self.get(network_ref, params={'_return_fields': 'network,utilization'})
+                if 'utilization' in network_data:
+                    util_tenths = network_data['utilization']
+                    util_percent = util_tenths / 10.0
+                    total_ips = 0 # Native call doesn't return this easily without calc
+                    return {
+                        "network": network_data.get('network', ''),
+                        "utilization_percent": util_percent,
+                        "utilization": util_percent,
+                        "status": "native" 
+                    }
+            except Exception:
+                # Fallback to manual calculation if native field fails or isn't supported
+                logger.debug("Native utilization fetch failed, falling back to manual calculation")
+                network_data = self.get(network_ref)
 
-            # Get the network details first
-            network_data = self.get(network_ref)
             network_addr = network_data.get('network', '')
-
             if not network_addr:
                 return {"error": "Network address not found"}
 
+            # ... (Rest of manual calculation logic as fallback) ...
+            
             # Calculate total IPs in network
             import ipaddress
             try:
                 net = ipaddress.IPv4Network(network_addr, strict=False)
-                total_ips = net.num_addresses - 2  # Exclude network and broadcast addresses
+                # ... existing logic ...
+                total_ips = net.num_addresses - 2
             except ValueError:
-                return {"error": f"Invalid network format: {network_addr}"}
-
-            # Get used IPs by counting fixed addresses and leases
+                 return {"error": f"Invalid network format: {network_addr}"}
+            
             used_ips = 0
 
-            # Count fixed addresses in this network
+            # Suppress logging for these calls as they might fail for certain network types
+            client_logger = logging.getLogger('infoblox_mcp.client')
+            original_level = client_logger.level
+            
             try:
+                client_logger.setLevel(logging.CRITICAL)
                 fixed_addrs = self.search_objects("fixedaddress", {"network": network_addr})
                 used_ips += len(fixed_addrs)
-            except Exception:
-                pass  # Continue even if this fails
+            except (InfoBloxAPIError, Exception):
+                pass
+            finally:
+                client_logger.setLevel(original_level)
 
-            # Count DHCP leases (active ones)
             try:
+                client_logger.setLevel(logging.CRITICAL)
                 leases = self.search_objects("lease", {"network": network_addr})
-                # Filter for active leases only
                 active_leases = [lease for lease in leases if lease.get('binding_state') == 'ACTIVE']
                 used_ips += len(active_leases)
-            except Exception:
-                pass  # Continue even if this fails
+            except (InfoBloxAPIError, Exception):
+                pass
+            finally:
+                client_logger.setLevel(original_level)
 
-            # Calculate utilization percentage
             utilization_percent = (used_ips / total_ips * 100) if total_ips > 0 else 0
 
             return {
@@ -309,7 +330,7 @@ class InfoBloxClient:
                 "used_ips": used_ips,
                 "available_ips": total_ips - used_ips,
                 "utilization_percent": round(utilization_percent, 2),
-                "utilization": round(utilization_percent, 2)  # For backward compatibility
+                "utilization": round(utilization_percent, 2)
             }
 
         except Exception as e:

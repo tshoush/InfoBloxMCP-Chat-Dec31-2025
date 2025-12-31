@@ -122,8 +122,8 @@ def main():
             print("Configuration setup cancelled.")
             return
     
-    # Get new configuration
-    config = get_user_input()
+    # Get new configuration using the unified prompt from ConfigManager
+    config = config_manager.prompt_for_config()
     
     # Test connection
     if test_connection(config):
@@ -142,10 +142,13 @@ def main():
         if retry in ['y', 'yes', 'true', '1']:
             main()  # Recursive retry
         else:
-            print("Configuration setup cancelled.")
-            sys.exit(1)
+            print("Configuration setup cancelled. (Note: You can still save if you trust your settings)")
+            save_anyway = input("Save anyway? [y/N]: ").strip().lower()
+            if save_anyway in ['y', 'yes', 'true', '1']:
+                config_manager.save_config(config)
+            else:
+                sys.exit(1)
 
 
 if __name__ == "__main__":
     main()
-
